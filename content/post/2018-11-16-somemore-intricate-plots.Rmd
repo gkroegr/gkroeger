@@ -1,0 +1,740 @@
+---
+title: Somemore Intricate Plots
+author: Grace Kroeger
+date: '2018-11-16'
+slug: somemore-intricate-plots
+categories:
+  - Health
+tags:
+  - R Markdown
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, fig.align = "center", fig.width = 8, fig.height = 6, out.width = "60%", echo = FALSE, message = FALSE)
+```
+
+#Building Maps
+```{r}
+library(ggplot2)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(maptools)
+library(ggthemes)
+```
+
+```{r}
+usa = map_data("county")  # get basic map data for all uSA counties 
+oh = subset(usa, region == "ohio")  # subset to counties in Ohio 
+names(oh)
+```
+#united States Map
+```{r}
+ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group), 
+    fill = "white", color = "black") + coord_fixed(1.3) + ggtitle("c")
+```
+
+#Ohio Map 
+```{r}
+ggplot() + geom_polygon(data = oh, aes(x = long, y = lat, group = group), 
+    fill = "white", color = "black") + coord_fixed(1.3) + ggtitle("c")
+```
+
+```{r}
+library(stringr)
+oh$county = str_to_title(oh$subregion)
+library(sp) 
+getLabelPoint <- # Returns a county-named list of label points
+function(county){Polygon(county[c('long', 'lat')])@labpt}
+centroids = by(oh, oh$county, getLabelPoint)     # Returns list
+centroids2 <- do.call("rbind.data.frame", centroids)  # Convert to Data Frame
+centroids2$county = rownames(centroids)
+names(centroids2) <- c('clong', 'clat', "county")         
+```
+
+#Merge 
+have to merge variable we want to map with the map data
+
+```{r}
+load("C:/users/kroeger/Dropbox/MPA/Data_Analysis/IndependentStudy/SAIPE/SAIPE/data/saipe_oh_0416.RData")
+```
+
+```{r}
+colnames(oh)[colnames(oh)=="county"] <- "NAME"
+
+save(oh, file = "C:/users/kroeger/Dropbox/MPA/Data_Analysis/IndependentStudy/SAIPE/SAIPE/data/oh.RData")
+```
+
+```{r}
+saipe_map1.df = merge(oh, saipe_oh_0416, by = c("NAME"), all.x = TRUE, 
+    sort = FALSE)
+saipe_map1.df = saipe_map1.df[order(saipe_map1.df$order), ]
+
+```
+To merge SAIPE and OH data, I first renamed the county column in oh because SAIPE column name is NAME and oh column name is county and then I saved the oh data frame with the new column name. On first run through of mapping tutorial, I only merged columns 4 and 5 to map just SAEPOVRTALL_PT variable, however, on a second run through I decided to merge more variables from the saipe_oh_0416 data set. 
+
+##Adding countyname labels to map. 
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+ggplot() + geom_polygon(data = saipe_map1.df, aes(x = long, y = lat, group = group), 
+    fill = "white", color = "gray") + coord_fixed(1.3) + geom_text(data = centroids2, 
+    aes(x = clong, y = clat, label = county), color = "darkblue", 
+    size = 1.25) + theme_map()
+```
+
+#Mapping Percent Poverty All across years. 
+
+```{r}
+saipe_oh_2016.df = subset(saipe_map1.df, time == "2016")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p16 <- ggplot() + geom_polygon(data = saipe_oh_2016.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "bottom") + ggtitle("2016")
+```
+
+
+```{r}
+saipe_oh_2015.df = subset(saipe_map1.df, time == "2015")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p15 <- ggplot() + geom_polygon(data = saipe_oh_2016.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2015 Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2015")
+```
+
+
+```{r}
+saipe_oh_2014.df = subset(saipe_map1.df, time == "2014")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p14 <- ggplot() + geom_polygon(data = saipe_oh_2014.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2014 Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2014")
+```
+
+
+```{r}
+saipe_oh_2013.df = subset(saipe_map1.df, time == "2013")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p13 <- ggplot() + geom_polygon(data = saipe_oh_2013.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2013 Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2013")
+```
+
+
+```{r}
+saipe_oh_2012.df = subset(saipe_map1.df, time == "2012")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p12 <- ggplot() + geom_polygon(data = saipe_oh_2012.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2012 Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2012")
+```
+
+```{r}
+saipe_oh_2011.df = subset(saipe_map1.df, time == "2011")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p11 <- ggplot() + geom_polygon(data = saipe_oh_2011.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2011 Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2011")
+```
+
+
+```{r}
+saipe_oh_2010.df = subset(saipe_map1.df, time == "2010")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p10 <- ggplot() + geom_polygon(data = saipe_oh_2010.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2010 Poverty %") + theme_map() + theme(legend.position = "none")
+```
+
+
+```{r}
+saipe_oh_2009.df = subset(saipe_map1.df, time == "2009")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p09 <- ggplot() + geom_polygon(data = saipe_oh_2009.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2009 Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2011")
+```
+
+
+```{r}
+saipe_oh_2008.df = subset(saipe_map1.df, time == "2008")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p08 <- ggplot() + geom_polygon(data = saipe_oh_2008.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2008 Poverty %") + theme_map() + theme(legend.position = "none")+ ggtitle("2010")
+```
+
+
+```{r}
+saipe_oh_2007.df = subset(saipe_map1.df, time == "2007")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p07 <- ggplot() + geom_polygon(data = saipe_oh_2007.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2007 Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2007")
+```
+
+
+```{r}
+saipe_oh_2006.df = subset(saipe_map1.df, time == "2006")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p06 <- ggplot() + geom_polygon(data = saipe_oh_2006.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2006 Poverty %") + theme_map() + theme(legend.position = "none")
+```
+
+```{r}
+saipe_oh_2005.df = subset(saipe_map1.df, time == "2005")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p05 <- ggplot() + geom_polygon(data = saipe_oh_2005.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2005 Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2006")
+```
+
+
+```{r}
+saipe_oh_2004.df = subset(saipe_map1.df, time == "2004")
+```
+
+```{r}
+library(ggplot2)
+library(maps)
+p04 <- ggplot() + geom_polygon(data = saipe_oh_2004.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "2004 Poverty %") + theme_map() + theme(legend.position = "none")+ ggtitle("2004")
+```
+
+##Combining all maps 
+```{r}
+library(patchwork)
+p04 + p05 + p06 + p07 + p08 + p05 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + plot_layout(ncol = 5)
+```
+
+##2016 Ohio Snapshot 
+```{r}
+library(ggplot2)
+library(maps)
+p1 <- ggplot() + geom_polygon(data = saipe_oh_2016.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRTALL_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "All Poverty") + theme_map() + theme(legend.position = "bottom")
+
+p2 <- ggplot() + geom_polygon(data = saipe_oh_2016.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRT0_17_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Age 0-17 Poverty") + theme_map() + theme(legend.position = "bottom")
+
+p3 <- ggplot() + geom_polygon(data = saipe_oh_2016.df, aes(x = long, y = lat, 
+    group = group, fill = SAEPOVRT5_17R_PT), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Age 5-17 Poverty") + theme_map() + theme(legend.position = "bottom")
+
+p4 <- ggplot() + geom_polygon(data = saipe_oh_2016.df, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEMHI_PT)), color = "black") + coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = "")) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Median Household Income") + theme_map() + theme(legend.position = "bottom")
+
+
+library(patchwork)
+p1 + p2 + p3 + p4 + plot_layout(ncol = 2)
+
+```
+
+ 
+
+#Quantile Poverty (all)
+```{r}
+library(dplyr)
+saipe_map16.df <- saipe_oh_2016.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2016.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p16q <- ggplot() + geom_polygon(data = saipe_map16.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "Poverty Quantiles") + 
+    theme_map() + theme(legend.position = "bottom") + ggtitle(NULL , subtitle = "2016")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map15.df <- saipe_oh_2015.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2015.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p15q <- ggplot() + geom_polygon(data = saipe_map15.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2015") + 
+    theme_map()+ theme(legend.position = "none") + ggtitle(NULL , subtitle = "2015")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map14.df <- saipe_oh_2014.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2014.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p14q <- ggplot() + geom_polygon(data = saipe_map14.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2014") + 
+    theme_map()+ theme(legend.position = "none") + ggtitle(NULL , subtitle = "2014")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map13.df <- saipe_oh_2013.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2013.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p13q <- ggplot() + geom_polygon(data = saipe_map13.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2013") + 
+    theme_map() + theme(legend.position = "none") + ggtitle(NULL , subtitle = "2013")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map12.df <- saipe_oh_2012.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2012.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p12q <- ggplot() + geom_polygon(data = saipe_map12.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2012") + 
+    theme_map() + theme(legend.position = "none") + ggtitle(NULL , subtitle = "2012")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map11.df <- saipe_oh_2011.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2011.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p11q <- ggplot() + geom_polygon(data = saipe_map11.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2011") + 
+    theme_map() + theme(legend.position = "none") + theme(legend.position = "none") + ggtitle(NULL , subtitle = "2011")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map10.df <- saipe_oh_2010.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2010.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p10q <- ggplot() + geom_polygon(data = saipe_map10.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2010") + 
+    theme_map() + theme(legend.position = "none") + ggtitle(NULL , subtitle = "2010")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map09.df <- saipe_oh_2009.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2009.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p09q <- ggplot() + geom_polygon(data = saipe_map09.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2009") + 
+    theme_map() + theme(legend.position = "none") + ggtitle(NULL , subtitle = "2009")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map08.df <- saipe_oh_2008.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2008.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p08q <- ggplot() + geom_polygon(data = saipe_map08.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2008") + 
+    theme_map() + theme(legend.position = "none")+ ggtitle(NULL , subtitle = "2008")
+```
+
+
+```{r}
+library(dplyr)
+saipe_map07.df <- saipe_oh_2007.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2007.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p07q <- ggplot() + geom_polygon(data = saipe_map07.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2007") + 
+    theme_map() + theme(legend.position = "none")+ ggtitle(NULL , subtitle = "2007")
+```
+
+
+
+```{r}
+library(dplyr)
+saipe_map06.df <- saipe_oh_2006.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2006.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p06q <- ggplot() + geom_polygon(data = saipe_map06.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2006") + 
+    theme_map() + theme(legend.position = "none") + ggtitle(NULL , subtitle = "2006")
+
+```
+
+
+```{r}
+library(dplyr)
+saipe_map05.df <- saipe_oh_2005.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2005.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p05q <- ggplot() + geom_polygon(data = saipe_map05.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2005") + 
+    theme_map() + theme(legend.position = "none") + ggtitle(NULL , subtitle = "2005")
+
+```
+
+
+```{r}
+library(dplyr)
+saipe_map04.df <- saipe_oh_2004.df %>% mutate(grouped_poverty = cut(SAEPOVRTALL_PT, breaks = c(quantile(saipe_oh_2004.df$SAEPOVRTALL_PT, 
+    probs = seq(0, 1, by = 0.2))), labels = c("0-20", "20-40", 
+    "40-60", "60-80", "80-100"), include.lowest = TRUE))
+```
+```{r}
+p04q <- ggplot() + geom_polygon(data = saipe_map04.df, aes(x = long, y = lat, 
+    group = group, fill = grouped_poverty), color = "black") + 
+    coord_fixed(1.3) + geom_text(data = centroids2, aes(x = clong, 
+    y = clat, label = "")) + 
+    scale_fill_brewer(palette = "Set1", direction = -1) + labs(fill = "2004") + 
+    theme_map() + theme(legend.position = "none") + ggtitle("SAIPE Poverty Data" , subtitle = "2004")
+
+```
+
+##Combining Quantile maps 
+```{r}
+library(patchwork)
+p04q + p05q + p06q + p07q + p08q + p05q + p10q + p11q + p12q + p13q + p14q + p15q + p16q + plot_layout(ncol = 5)
+```
+
+#United States Poverty 
+```{r}
+library(fiftystater)
+library(ggplot2)
+library(maps)
+library(dplyr)
+```
+
+```{r}
+load("C:/users/kroeger/Dropbox/MPA/Data_Analysis/IndependentStudy/SAIPE/SAIPE/data/saipe_usa2.RData")
+```
+
+##Poverty Percent by Year 
+```{r}
+
+df16 <- subset(saipe_usa2.df, time =="2016")
+
+df16 <- df16 %>%
+  arrange(group, order)
+
+p16u <- ggplot() + 
+  geom_polygon(data = df16, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "bottom")
+```
+
+
+```{r}
+df15 <- subset(saipe_usa2.df, time =="2015")
+
+df15 <- df15 %>%
+  arrange(group, order)
+
+p15u <-ggplot() + 
+  geom_polygon(data = df15, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2015")
+```
+
+
+```{r}
+df14 <- subset(saipe_usa2.df, time =="2014")
+
+df14 <- df14 %>%
+  arrange(group, order)
+
+p14u <-ggplot() + 
+  geom_polygon(data = df14, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2014")
+```
+
+```{r}
+df13 <- subset(saipe_usa2.df, time =="2013")
+
+df13 <- df13 %>%
+  arrange(group, order)
+
+p13u <-ggplot() + 
+  geom_polygon(data = df13, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2013")
+```
+
+```{r}
+df12 <- subset(saipe_usa2.df, time =="2012")
+
+df12 <- df12 %>%
+  arrange(group, order)
+
+p12u <-ggplot() + 
+  geom_polygon(data = df12, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2012")
+```
+
+```{r}
+df11 <- subset(saipe_usa2.df, time =="2011")
+
+df11 <- df11 %>%
+  arrange(group, order)
+
+p11u <-ggplot() + 
+  geom_polygon(data = df11, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2011")
+```
+
+```{r}
+df10 <- subset(saipe_usa2.df, time =="2010")
+
+df10 <- df10 %>%
+  arrange(group, order)
+
+p10u <-ggplot() + 
+  geom_polygon(data = df10, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2010")
+```
+
+```{r}
+df09 <- subset(saipe_usa2.df, time =="2009")
+
+df09 <- df09 %>%
+  arrange(group, order)
+
+p09u <-ggplot() + 
+  geom_polygon(data = df15, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2009")
+```
+
+```{r}
+df08 <- subset(saipe_usa2.df, time =="2008")
+
+df08 <- df08 %>%
+  arrange(group, order)
+
+p08u <-ggplot() + 
+  geom_polygon(data = df08, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2008")
+```
+
+```{r}
+df07 <- subset(saipe_usa2.df, time =="2007")
+
+df07 <- df07 %>%
+  arrange(group, order)
+
+p07u <-ggplot() + 
+  geom_polygon(data = df07, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2007")
+```
+
+```{r}
+df06 <- subset(saipe_usa2.df, time =="2006")
+
+df06 <- df06 %>%
+  arrange(group, order)
+
+p06u <-ggplot() + 
+  geom_polygon(data = df06, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2006")
+```
+
+```{r}
+df05 <- subset(saipe_usa2.df, time =="2005")
+
+df05 <- df05 %>%
+  arrange(group, order)
+
+p05u <-ggplot() + 
+  geom_polygon(data = df05, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2005")
+```
+
+```{r}
+df04 <- subset(saipe_usa2.df, time =="2004")
+
+df04 <- df04 %>%
+  arrange(group, order)
+
+p04u <-ggplot() + 
+  geom_polygon(data = df04, aes(x = long, y = lat, 
+    group = group, fill = as.numeric(SAEPOVRTALL_PT)), color = "black") + 
+  coord_fixed(1.3) + 
+    geom_text(data = centroids2, aes(x = clong, y = clat, label = county), 
+        color = "black", size = 2.25) + scale_fill_distiller(palette = "Spectral") + 
+    labs(fill = "Poverty %") + theme_map() + theme(legend.position = "none") + ggtitle("2004")
+```
+
+```{r}
+library(patchwork)
+p04u + p05u + p06u + p07u + p08u + p05u + p10u + p11u + p12u + p13u + p14u + p15u + p16u + plot_layout(ncol = 5)
+```
+

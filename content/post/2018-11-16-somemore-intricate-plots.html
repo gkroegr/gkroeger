@@ -1,0 +1,59 @@
+---
+title: Somemore Intricate Plots
+author: Grace Kroeger
+date: '2018-11-16'
+slug: somemore-intricate-plots
+categories:
+  - Health
+tags:
+  - R Markdown
+---
+
+
+
+<div id="building-maps" class="section level1">
+<h1>Building Maps</h1>
+<pre><code>## [1] &quot;long&quot;      &quot;lat&quot;       &quot;group&quot;     &quot;order&quot;     &quot;region&quot;    &quot;subregion&quot;</code></pre>
+</div>
+<div id="united-states-map" class="section level1">
+<h1>united States Map</h1>
+<p><img src="/post/2018-11-16-somemore-intricate-plots_files/figure-html/unnamed-chunk-3-1.png" width="60%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="ohio-map" class="section level1">
+<h1>Ohio Map</h1>
+<p><img src="/post/2018-11-16-somemore-intricate-plots_files/figure-html/unnamed-chunk-4-1.png" width="60%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="merge" class="section level1">
+<h1>Merge</h1>
+<p>have to merge variable we want to map with the map data</p>
+<p>To merge SAIPE and OH data, I first renamed the county column in oh because SAIPE column name is NAME and oh column name is county and then I saved the oh data frame with the new column name. On first run through of mapping tutorial, I only merged columns 4 and 5 to map just SAEPOVRTALL_PT variable, however, on a second run through I decided to merge more variables from the saipe_oh_0416 data set.</p>
+<div id="adding-countyname-labels-to-map." class="section level2">
+<h2>Adding countyname labels to map.</h2>
+<p><img src="/post/2018-11-16-somemore-intricate-plots_files/figure-html/unnamed-chunk-9-1.png" width="60%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="mapping-percent-poverty-all-across-years." class="section level1">
+<h1>Mapping Percent Poverty All across years.</h1>
+<div id="combining-all-maps" class="section level2">
+<h2>Combining all maps</h2>
+<p><img src="/post/2018-11-16-somemore-intricate-plots_files/figure-html/unnamed-chunk-36-1.png" width="60%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="ohio-snapshot" class="section level2">
+<h2>2016 Ohio Snapshot</h2>
+<p><img src="/post/2018-11-16-somemore-intricate-plots_files/figure-html/unnamed-chunk-37-1.png" width="60%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="quantile-poverty-all" class="section level1">
+<h1>Quantile Poverty (all)</h1>
+<div id="combining-quantile-maps" class="section level2">
+<h2>Combining Quantile maps</h2>
+<p><img src="/post/2018-11-16-somemore-intricate-plots_files/figure-html/unnamed-chunk-64-1.png" width="60%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="united-states-poverty" class="section level1">
+<h1>United States Poverty</h1>
+<div id="poverty-percent-by-year" class="section level2">
+<h2>Poverty Percent by Year</h2>
+<p><img src="/post/2018-11-16-somemore-intricate-plots_files/figure-html/unnamed-chunk-80-1.png" width="60%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
