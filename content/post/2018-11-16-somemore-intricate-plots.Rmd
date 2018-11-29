@@ -1,5 +1,5 @@
 ---
-title: Somemore Intricate Plots
+title: Some More Intricate Plots
 author: Grace Kroeger
 date: '2018-11-16'
 slug: somemore-intricate-plots
@@ -30,7 +30,7 @@ oh = subset(usa, region == "ohio")  # subset to counties in Ohio
 names(oh)
 ```
 #united States Map
-```{r}
+```{r, echo = FALSE}
 ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group), 
     fill = "white", color = "black") + coord_fixed(1.3) + ggtitle("c")
 ```
